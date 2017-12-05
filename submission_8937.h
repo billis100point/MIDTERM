@@ -9,7 +9,7 @@
 #include <ctime>
 #include <stdlib.h>
 using namespace std;
-int choosing(vector<vector<int>>&neighiborhood, int selected_node)//±q¿ï¨úÂIªº¾F©~¤¤¬D¤@­Ó
+int choosing(vector<vector<int>>&neighiborhood, int selected_node)//å¾é¸å–é»çš„é„°å±…ä¸­æŒ‘ä¸€å€‹
 {
 	int pick_an_number;
 	pick_an_number = rand() % neighiborhood[selected_node].size();
@@ -35,15 +35,13 @@ int* community_detection(int **A, const int NUM_NODES)//A is a adjacency matrix,
 	int *random_node_shunshi = new int[NUM_NODES];
 	int part;
 	int *P = new int[NUM_NODES];
-	int N = 1;
-	int M = 2;
-	int k = -1;
+	int max[NUM_NODES]={0} ;
 
-	vector<vector<int>>nebr(NUM_NODES, vector<int>());//¤£­nÃhºÃ¡Anebr¬O¾F©~
-	int ** node_imformantion = new int *[NUM_NODES];//¸ê®ÆÂI²{¦³¼ĞÅÒ¬ö¿ı
+	vector<vector<int>>nebr(NUM_NODES, vector<int>());//ä¸è¦æ‡·ç–‘ï¼Œnebræ˜¯é„°å±…
+	int ** node_imformantion = new int *[NUM_NODES];//è³‡æ–™é»ç¾æœ‰æ¨™ç±¤ç´€éŒ„
 	for (int i = 0; i < NUM_NODES; i++)
 	{
-		node_imformantion[i] = new int[1+(202 * NUM_NODES)];
+		node_imformantion[i] = new int[NUM_NODES];
 	}
 
 
@@ -56,15 +54,10 @@ int* community_detection(int **A, const int NUM_NODES)//A is a adjacency matrix,
 				nebr[i].push_back(j);
 			}
 		}
-		node_imformantion[i][0] = i;
 	}
 	for (int i = 0; i < NUM_NODES; i++)
-		for (int j = 1; j < 1+(202 * NUM_NODES); j++)
-		{
-			node_imformantion[i][j] = -1;
-		}
-
-	//§ä´M»P¿ï¨ú¸ê®ÆÂI¬Û¾F¤§¸ê®ÆÂI¶¶«Kµ¹¤©«¥­Ì¸ê®ÆÂIªì©l¼ĞÅÒ
+		node_imformantion[i][j] = 1;
+	//æ‰¾å°‹èˆ‡é¸å–è³‡æ–™é»ç›¸é„°ä¹‹è³‡æ–™é»é †ä¾¿çµ¦äºˆå’±å€‘è³‡æ–™é»åˆå§‹æ¨™ç±¤
 	for (int rePick = 0; rePick < 202; rePick++)
 	{
 		for (int i = 0; i < NUM_NODES; i++)
@@ -79,7 +72,7 @@ int* community_detection(int **A, const int NUM_NODES)//A is a adjacency matrix,
 			random_node_shunshi[temp] = P[part];
 			P[part] = -1;
 		}//cout << random_node[temp] << endl;
-		 //ÀH¾÷¿ï¨ú¥á¸ê®Æ¶¶§Ç
+		 //éš¨æ©Ÿé¸å–ä¸Ÿè³‡æ–™é †åº
 		for (int times = 0; times < NUM_NODES; times++)
 		{
 			for (int pick_node = 0; pick_node < NUM_NODES; pick_node++)
@@ -87,47 +80,28 @@ int* community_detection(int **A, const int NUM_NODES)//A is a adjacency matrix,
 				if (!nebr[random_node_shunshi[pick_node]].empty())
 				{
 					pickAnebr = choosing(nebr, random_node_shunshi[pick_node]);
-					k = rand() % M;
-					while(node_imformantion[pickAnebr][k]==-1)
+					if (repick == 0) 
 					{
-						k = rand() % M;
+						node_imformantion[i][pickAnebr]++;
+						max[i] = pickAnebr;
 					}
-						node_imformantion[random_node_shunshi[pick_node]][N] = node_imformantion[pickAnebr][k];
-					
+					else  
+					{
+						node_imformantion[pick_node][max[pickAnebr]]++;
+						if (node_imformantion[pick_node][max[pick_node]] < node_imformantion[pick_node][max[pickAnebr]]) 
+						{
+							max[pick_node] = max[pickAnebr];
+						}
+					}	
 				}
-			}//¿ï¾ÜÂI¦¬¤J¼ĞÅÒ
-			N++;
-			M++;
+			}//é¸æ“‡é»æ”¶å…¥æ¨™ç±¤
 		}
 		
 	}
 
 
 	for (int i = 0; i < NUM_NODES; i++)
-	{
-		most = -1;
-		int *count = new int[NUM_NODES];
-		for (int j = 0; j < NUM_NODES; j++)
-		{
-			count[j] = 0;
-		}
-		for (int j = 0; j < 1+(202 * NUM_NODES); j++)
-		{
-			if (0<=node_imformantion[i][j])
-			{
-				count[node_imformantion[i][j]]++;
-			}
-			
-		}
-		for (int j = 0; j < NUM_NODES; j++)
-		{
-			if (count[j] > most)
-			{
-				most = count[j];
-				ans[i] = j;
-			}
-		}
-	}
+		ans[i]=max[i];
 
 	//end-------------------------------------------------------------------------------
 	return ans;
